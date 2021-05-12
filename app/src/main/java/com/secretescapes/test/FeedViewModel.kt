@@ -2,16 +2,9 @@ package com.secretescapes.test
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.flatMapMerge
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onSubscription
-import kotlinx.coroutines.flow.scan
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.MediaType.Companion.toMediaType
@@ -29,22 +22,38 @@ class FeedViewModel : ViewModel() {
 
     private val okHttpClient = OkHttpClient()
 
-    private val intentions = MutableSharedFlow<Intention>()
+    private val _state = MutableStateFlow<MainState>(MainState.Idle)
+    val myState: StateFlow<MainState>
+        get() = _state
+    val userIntent = Channel<Intention>(Channel.UNLIMITED)
 
-    @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
-    val state = intentions
-        .onSubscription {
-            emit(Intention.Initial)
-        }.flatMapMerge { intention ->
-            when (intention) {
-                Intention.Initial -> flow { emit(requestSales()) }
-                    .map<List<Sale>, MviResult<FeedState>> { sales ->
-                        FeedLoadedResult(sales)
+    init {
+        handleIntent()
+    }
+    private fun handleIntent() {
+        viewModelScope.launch {
+            userIntent.consumeAsFlow().collect{
+                when (it) {
+                    is Intention.Initial -> {
+                        viewModelScope.launch {
+                            _state.value = MainState.Loading
+                            _state.value = try {
+                                MainState.ValidData(requestSales())
+                            } catch (e: Exception) {
+                                MainState.Error(e.localizedMessage)
+                            }
+                        }
                     }
+                    is Intention.Refresh -> {
+                        //TODO
+                    }
+                    is Intention.Third -> {
+                        //TODO
+                    }
+                }
             }
-        }.scan(FeedState()) { accumulator, value ->
-            value.reduce(accumulator)
-        }.stateIn(viewModelScope, SharingStarted.Lazily, FeedState())
+        }
+    }
 
     private suspend fun requestSales() = suspendCoroutine<List<Sale>> { cont ->
         val gqlBody = JSONObject()
@@ -74,7 +83,8 @@ class FeedViewModel : ViewModel() {
                     salesList.add(
                         Sale(
                             id = salesObject.getString("id"),
-                            title = salesObject.getString("title")
+                            title = salesObject.getString("title"),
+                            summaryContent = salesObject.getString("summaryContent")
                         )
                     )
                 }
@@ -85,6 +95,8 @@ class FeedViewModel : ViewModel() {
 
     sealed class Intention {
         object Initial : Intention()
+        object Refresh : Intention()
+        object Third : Intention()
     }
 
     private companion object {
@@ -96,6 +108,7 @@ class FeedViewModel : ViewModel() {
                 ) {
                     id
                     title
+                    summaryContent
                 }
             }
         """

@@ -8,6 +8,20 @@
     <fragment
             android:id="@+id/feed_fragment"
             android:name="com.secretescapes.test.FeedFragment"
-            tools:layout="@layout/feed_fragment" />
+            tools:layout="@layout/feed_fragment" >
+        <action
+            android:id="@+id/action_feed_fragment_to_detailFragment"
+            app:destination="@id/detailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/detailFragment"
+        android:name="com.secretescapes.test.DetailFragment"
+        android:label="DetailFragment" >
+
+        <argument
+            android:name="sale"
+            app:argType="com.secretescapes.test.Sale"/>
+    </fragment>
 
 </navigation>

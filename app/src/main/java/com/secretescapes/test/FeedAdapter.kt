@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class FeedAdapter(private val context: Context) : RecyclerView.Adapter<FeedAdapter.ViewHolder>() {
+class FeedAdapter(private val context: Context, private val itemClickListener: (Sale)->Unit) : RecyclerView.Adapter<FeedAdapter.ViewHolder>() {
 
     private val internalSalesList = mutableListOf<Sale>()
 
@@ -20,6 +20,9 @@ class FeedAdapter(private val context: Context) : RecyclerView.Adapter<FeedAdapt
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.itemView.findViewById<TextView>(R.id.sale_title).text =
             internalSalesList[position].title
+        holder.itemView.setOnClickListener {
+            itemClickListener.invoke(internalSalesList[position])
+        }
     }
 
     override fun getItemCount(): Int = internalSalesList.size

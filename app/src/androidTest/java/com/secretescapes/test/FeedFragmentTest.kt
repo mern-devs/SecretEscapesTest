@@ -18,7 +18,7 @@ class FeedFragmentTest {
      */
     @Test
     fun saleTitle_InPosition10_shouldBeCorrect() {
-        launchFragmentInContainer(themeResId = R.style.Theme_SecretEscapesTest) { FeedFragment() }
+        launchFragmentInContainer(themeResId = R.style.Theme_SecretEscapesTest) { FeedFragment(true) }
 
         /********* Don't change below this line please **********/
         onView(withId(R.id.recycler_view)).perform(

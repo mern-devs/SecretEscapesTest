@@ -1,11 +1,13 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+    id 'androidx.navigation.safeargs'
+    id 'kotlin-parcelize'
 }
 
 android {
     compileSdkVersion 30
-    buildToolsVersion "30.0.2"
+    buildToolsVersion "30.0.3"
 
     defaultConfig {
         applicationId "com.secretescapes.test"
@@ -35,14 +37,14 @@ android {
 
 dependencies {
 
-    def nav_version = "2.3.3"
+    def nav_version = "2.3.5"
 
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
 
-    debugImplementation 'androidx.fragment:fragment-testing:1.3.0'
+    debugImplementation 'androidx.fragment:fragment-testing:1.3.3'
 
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.0'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2'
     implementation("com.squareup.okhttp3:okhttp:4.9.1")
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
